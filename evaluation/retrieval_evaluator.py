@@ -11,6 +11,7 @@ from sklearn.metrics import precision_recall_curve, average_precision_score
 import pandas as pd
 import json
 import argparse
+import datetime
 
 class RetrievalEvaluator:
     """
@@ -133,7 +134,16 @@ class RetrievalEvaluator:
             self.gallery_embeddings_clip = self.gallery_embeddings_clip / norms
     
     def compute_similarity_matrix(self, query_embeddings, gallery_embeddings):
-        """计算查询和候选文档之间的相似度矩阵"""
+        """
+        计算查询和候选文档之间的相似度矩阵，按照visual_bge模型的实现方式
+        
+        Args:
+            query_embeddings: 查询嵌入向量
+            gallery_embeddings: 候选文档嵌入向量
+            
+        Returns:
+            np.ndarray: 相似度矩阵
+        """
         print(f"查询嵌入形状: {query_embeddings.shape}")
         print(f"候选文档嵌入形状: {gallery_embeddings.shape}")
         
@@ -167,8 +177,28 @@ class RetrievalEvaluator:
             gallery_embeddings = gallery_embeddings[..., :min_dim]
             print(f"截断后 - 查询形状: {query_embeddings.shape}, 候选形状: {gallery_embeddings.shape}")
         
-        # 计算余弦相似度
+        # 对嵌入向量进行归一化
+        # 在visual_bge模型中，归一化是在encode方法中完成的
+        # 因此这里需要确保向量已经归一化
+        query_norms = np.linalg.norm(query_embeddings, axis=1, keepdims=True)
+        gallery_norms = np.linalg.norm(gallery_embeddings, axis=1, keepdims=True)
+        
+        # 避免除以零
+        query_norms = np.maximum(query_norms, 1e-8)
+        gallery_norms = np.maximum(gallery_norms, 1e-8)
+        
+        # 标准化向量
+        query_embeddings = query_embeddings / query_norms
+        gallery_embeddings = gallery_embeddings / gallery_norms
+        
+        # 计算余弦相似度 - 与visual_bge.compute_similarity保持一致
         similarity_matrix = np.matmul(query_embeddings, gallery_embeddings.T)
+        
+        # 输出相似度范围（调试用）
+        min_sim = np.min(similarity_matrix)
+        max_sim = np.max(similarity_matrix)
+        print(f"相似度值范围: [{min_sim:.4f}, {max_sim:.4f}]")
+        
         return similarity_matrix
     
     def evaluate_retrieval(
@@ -231,6 +261,10 @@ class RetrievalEvaluator:
         metrics.update({
             f"success@{k}": 0.0 for k in k_values
         })
+        # 添加MRR@k指标
+        metrics.update({
+            f"mrr@{k}": 0.0 for k in k_values
+        })
         metrics["mAP"] = 0.0
         metrics["num_queries"] = len(query_product_ids)
         
@@ -284,6 +318,17 @@ class RetrievalEvaluator:
                 success_at_k = 1.0 if np.sum(relevance[top_k_indices]) > 0 else 0.0
                 metrics[f"success@{k}"] += success_at_k
                 query_metrics[f"success@{k}"] = success_at_k
+                
+                # 计算MRR@k = 第一个相关结果的倒数排名，如果前k个没有相关结果则为0
+                mrr_at_k = 0.0
+                relevant_positions = np.where(relevance[top_k_indices] == 1)[0]
+                if len(relevant_positions) > 0:
+                    # 找到第一个相关结果的位置 (0-based) 加1转为排名 (1-based)
+                    first_relevant_rank = relevant_positions[0] + 1
+                    mrr_at_k = 1.0 / first_relevant_rank
+                
+                metrics[f"mrr@{k}"] += mrr_at_k
+                query_metrics[f"mrr@{k}"] = mrr_at_k
             
             # 计算平均精度 (AP)
             # 获取相关候选的排名
@@ -312,6 +357,7 @@ class RetrievalEvaluator:
                 metrics[f"recall@{k}"] /= num_valid_queries
                 metrics[f"precision@{k}"] /= num_valid_queries
                 metrics[f"success@{k}"] /= num_valid_queries
+                metrics[f"mrr@{k}"] /= num_valid_queries
             metrics["mAP"] /= num_valid_queries
         
         # 记录模态分布
@@ -361,6 +407,7 @@ class RetrievalEvaluator:
                 print(f"  Recall@{k}: {dnmsr_results[f'recall@{k}']:.4f}")
                 print(f"  Precision@{k}: {dnmsr_results[f'precision@{k}']:.4f}")
                 print(f"  Success@{k}: {dnmsr_results[f'success@{k}']:.4f}")
+                print(f"  MRR@{k}: {dnmsr_results[f'mrr@{k}']:.4f}")
             
             if "modality_distribution" in dnmsr_results:
                 print(f"  模态分布:")
@@ -388,7 +435,133 @@ class RetrievalEvaluator:
                 print(f"  Recall@{k}: {clip_results[f'recall@{k}']:.4f}")
                 print(f"  Precision@{k}: {clip_results[f'precision@{k}']:.4f}")
                 print(f"  Success@{k}: {clip_results[f'success@{k}']:.4f}")
-    
+                print(f"  MRR@{k}: {clip_results[f'mrr@{k}']:.4f}")
+        
+        # 生成检索示例分析
+        self.generate_retrieval_examples()
+        
+    def generate_retrieval_examples(self, num_examples=10, top_k=10):
+        """
+        生成检索示例分析，展示指定数量的查询及其检索结果
+        
+        Args:
+            num_examples: 要生成的示例数量
+            top_k: 每个查询展示的检索结果数量
+        """
+        if not self.results:
+            print(f"没有评估结果可分析")
+            return
+            
+        print(f"生成检索示例分析 ({num_examples}个查询, 每个展示前{top_k}个结果)...")
+        
+        # 准备输出文件
+        examples_file = os.path.join(self.output_dir, "retrieval_examples.txt")
+        
+        # 准备相似度矩阵 - 对每个模型，需要重新计算查询和候选文档之间的相似度
+        similarity_matrices = {}
+        
+        # 计算DNMSR相似度矩阵
+        if "dnmsr" in self.results and self.query_embeddings_dnmsr is not None and self.gallery_embeddings_dnmsr is not None:
+            similarity_matrices["dnmsr"] = self.compute_similarity_matrix(
+                self.query_embeddings_dnmsr, 
+                self.gallery_embeddings_dnmsr
+            )
+            
+        # 计算CLIP相似度矩阵
+        if "clip" in self.results and self.query_embeddings_clip is not None and self.gallery_embeddings_clip is not None:
+            similarity_matrices["clip"] = self.compute_similarity_matrix(
+                self.query_embeddings_clip, 
+                self.gallery_embeddings_clip
+            )
+        
+        # 确保至少有一个模型的相似度矩阵
+        if not similarity_matrices:
+            print(f"无法生成检索示例分析，缺少相似度数据")
+            return
+            
+        # 抽取随机查询ID作为示例
+        query_indices = list(range(len(self.query_product_ids)))
+        if len(query_indices) > num_examples:
+            # 随机抽样，但固定随机种子以确保可重现性
+            np.random.seed(42)
+            selected_indices = np.random.choice(query_indices, num_examples, replace=False)
+        else:
+            selected_indices = query_indices
+            
+        # 为每个选中的查询生成分析
+        with open(examples_file, 'w', encoding='utf-8') as f:
+            f.write(f"# Retrieval Example Analysis\n\n")
+            f.write(f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Total queries: {len(self.query_product_ids)}\n")
+            f.write(f"Showing {len(selected_indices)} random examples with top {top_k} results each\n\n")
+            
+            for idx, query_idx in enumerate(selected_indices):
+                query_id = self.query_product_ids[query_idx]
+                
+                f.write(f"## Example {idx + 1}: Query ID {query_id}\n\n")
+                
+                # 对每个模型展示检索结果
+                for model_name, sim_matrix in similarity_matrices.items():
+                    f.write(f"### {model_name.upper()} Model Results\n\n")
+                    
+                    # 获取该查询的相似度向量
+                    similarities = sim_matrix[query_idx]
+                    
+                    # 对相似度进行排序，获取前k个结果
+                    sorted_indices = np.argsort(-similarities)[:top_k]
+                    
+                    # 获取对应的候选文档ID
+                    gallery_ids = None
+                    gallery_modalities = None
+                    
+                    if model_name == "dnmsr":
+                        gallery_ids = self.gallery_product_ids_dnmsr
+                        gallery_modalities = self.gallery_modalities_dnmsr
+                    elif model_name == "clip":
+                        gallery_ids = self.gallery_product_ids_clip
+                        gallery_modalities = None  # CLIP模型可能没有模态信息
+                        
+                    if gallery_ids is None:
+                        f.write(f"No gallery information available for {model_name}\n\n")
+                        continue
+                        
+                    # 确定是否有相关文档
+                    relevant_indices = np.where(gallery_ids == query_id)[0]
+                    has_relevant = len(relevant_indices) > 0
+                    
+                    if has_relevant:
+                        f.write(f"This query has {len(relevant_indices)} relevant documents in the gallery\n\n")
+                    else:
+                        f.write(f"This query has no relevant documents in the gallery\n\n")
+                    
+                    # 创建表格标题
+                    if gallery_modalities is not None:
+                        f.write(f"| Rank | Document ID | Similarity | Modality | Relevant |\n")
+                        f.write(f"|------|------------|------------|----------|----------|\n")
+                    else:
+                        f.write(f"| Rank | Document ID | Similarity | Relevant |\n")
+                        f.write(f"|------|------------|------------|----------|\n")
+                    
+                    # 展示前k个结果
+                    for rank, idx in enumerate(sorted_indices):
+                        doc_id = gallery_ids[idx]
+                        similarity = similarities[idx]
+                        is_relevant = doc_id == query_id
+                        
+                        if gallery_modalities is not None:
+                            modality = gallery_modalities[idx]
+                            f.write(f"| {rank+1} | {doc_id} | {similarity:.4f} | {modality} | {'✓' if is_relevant else '✗'} |\n")
+                        else:
+                            f.write(f"| {rank+1} | {doc_id} | {similarity:.4f} | {'✓' if is_relevant else '✗'} |\n")
+                    
+                    f.write("\n")
+                
+                # 添加查询之间的分隔线
+                if idx < len(selected_indices) - 1:
+                    f.write(f"---\n\n")
+        
+        print(f"检索示例分析已保存到: {examples_file}")
+        
     def save_results(self) -> None:
         """保存评估结果"""
         if not self.results:
@@ -410,12 +583,13 @@ class RetrievalEvaluator:
             "mAP": [],
         }
         
-        # 添加recall、precision和success指标
+        # 添加recall、precision、success和mrr指标
         k_values = [1, 5, 10, 20, 50]
         for k in k_values:
             summary[f"recall@{k}"] = []
             summary[f"precision@{k}"] = []
             summary[f"success@{k}"] = []
+            summary[f"mrr@{k}"] = []
         
         # 添加各模型的结果
         for model, results in self.results.items():
@@ -437,6 +611,11 @@ class RetrievalEvaluator:
                     summary[f"success@{k}"].append(results[f"success@{k}"])
                 else:
                     summary[f"success@{k}"].append(float('nan'))
+                    
+                if f"mrr@{k}" in results:
+                    summary[f"mrr@{k}"].append(results[f"mrr@{k}"])
+                else:
+                    summary[f"mrr@{k}"].append(float('nan'))
         
         # 创建DataFrame并保存为CSV
         summary_df = pd.DataFrame(summary)
@@ -452,6 +631,9 @@ class RetrievalEvaluator:
         """绘制性能对比图"""
         if not self.results:
             return
+            
+        # 配置中文字体支持 - 由于系统原因无法生效，改用英文
+        # self._setup_chinese_font()
         
         # 绘制召回率对比图
         plt.figure(figsize=(10, 6))
@@ -464,9 +646,9 @@ class RetrievalEvaluator:
             recalls = [results.get(f"recall@{k}", 0) for k in k_values]
             plt.bar(x + i*width, recalls, width, label=model.upper())
         
-        plt.xlabel('K值')
-        plt.ylabel('召回率')
-        plt.title('不同模型在各K值下的召回率对比')
+        plt.xlabel('K Value')
+        plt.ylabel('Recall')
+        plt.title('Recall Comparison at Different K Values')
         plt.xticks(x + width/2, [f"@{k}" for k in k_values])
         plt.legend()
         plt.grid(axis='y', linestyle='--', alpha=0.7)
@@ -483,9 +665,9 @@ class RetrievalEvaluator:
             precisions = [results.get(f"precision@{k}", 0) for k in k_values]
             plt.bar(x + i*width, precisions, width, label=model.upper())
         
-        plt.xlabel('K值')
-        plt.ylabel('精确率')
-        plt.title('不同模型在各K值下的精确率对比')
+        plt.xlabel('K Value')
+        plt.ylabel('Precision')
+        plt.title('Precision Comparison at Different K Values')
         plt.xticks(x + width/2, [f"@{k}" for k in k_values])
         plt.legend()
         plt.grid(axis='y', linestyle='--', alpha=0.7)
@@ -502,9 +684,9 @@ class RetrievalEvaluator:
             successes = [results.get(f"success@{k}", 0) for k in k_values]
             plt.bar(x + i*width, successes, width, label=model.upper())
         
-        plt.xlabel('K值')
-        plt.ylabel('成功率')
-        plt.title('不同模型在各K值下的成功率对比 (Success@k)')
+        plt.xlabel('K Value')
+        plt.ylabel('Success Rate')
+        plt.title('Success Rate Comparison at Different K Values (Success@k)')
         plt.xticks(x + width/2, [f"@{k}" for k in k_values])
         plt.legend()
         plt.grid(axis='y', linestyle='--', alpha=0.7)
@@ -515,6 +697,26 @@ class RetrievalEvaluator:
         success_plot_file = os.path.join(self.output_dir, "success_comparison.png")
         plt.savefig(success_plot_file, dpi=300)
         
+        # 绘制MRR@k对比图
+        plt.figure(figsize=(10, 6))
+        
+        for i, (model, results) in enumerate(self.results.items()):
+            mrrs = [results.get(f"mrr@{k}", 0) for k in k_values]
+            plt.bar(x + i*width, mrrs, width, label=model.upper())
+        
+        plt.xlabel('K Value')
+        plt.ylabel('Mean Reciprocal Rank')
+        plt.title('Mean Reciprocal Rank Comparison at Different K Values (MRR@k)')
+        plt.xticks(x + width/2, [f"@{k}" for k in k_values])
+        plt.legend()
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.ylim(0, 1.0)  # MRR是0-1的值
+        
+        # 保存图表
+        plt.tight_layout()
+        mrr_plot_file = os.path.join(self.output_dir, "mrr_comparison.png")
+        plt.savefig(mrr_plot_file, dpi=300)
+        
         # 绘制mAP对比图
         plt.figure(figsize=(8, 6))
         
@@ -522,9 +724,9 @@ class RetrievalEvaluator:
         maps = [results["mAP"] for results in self.results.values()]
         
         plt.bar(models, maps, color=['#1f77b4', '#ff7f0e'])
-        plt.xlabel('模型')
+        plt.xlabel('Model')
         plt.ylabel('mAP')
-        plt.title('不同模型的mAP对比')
+        plt.title('mAP Comparison Between Models')
         plt.ylim(0, 1.0)
         
         # 在柱状图上添加数值标签
@@ -538,7 +740,30 @@ class RetrievalEvaluator:
         map_plot_file = os.path.join(self.output_dir, "map_comparison.png")
         plt.savefig(map_plot_file, dpi=300)
         
-        print(f"性能对比图已保存到: {self.output_dir}")
+        print(f"Performance comparison charts saved to: {self.output_dir}")
+    
+    def _setup_chinese_font(self):
+        """配置中文字体支持"""
+        import matplotlib as mpl
+        # 检测操作系统
+        import platform
+        system = platform.system()
+        
+        if system == 'Windows':
+            # Windows字体
+            mpl.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS']
+        elif system == 'Darwin':  # macOS
+            # macOS字体
+            mpl.rcParams['font.sans-serif'] = ['PingFang SC', 'Heiti SC', 'STHeiti', 'Arial Unicode MS']
+        else:  # Linux等
+            # Linux字体
+            mpl.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei', 'Droid Sans Fallback', 'Arial Unicode MS']
+            
+        # 通用设置，解决负号显示问题
+        mpl.rcParams['axes.unicode_minus'] = False
+        
+        # 设置DPI，确保图像清晰
+        mpl.rcParams['figure.dpi'] = 100
 
 def main():
     # 解析命令行参数

@@ -98,8 +98,10 @@ class Visualized_BGE(nn.Module):
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
             self.to(self.device)
+            print('use cuda')
         else:
             self.device = torch.device('cpu')
+            print('use cpu')
         self.dtype = next(bge.parameters()).dtype
     
     def load_model(self, model_weight):

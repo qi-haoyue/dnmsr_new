@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-更新评估结果 - 添加Success@k指标
+更新评估结果 - 添加Success@k和MRR@k指标
 
-此脚本读取已有的评估结果JSON文件，计算Success@k指标，并更新结果。
+此脚本读取已有的评估结果JSON文件，计算Success@k和MRR@k指标，并更新结果。
 """
 
 import os
@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 from typing import Dict, List, Any, Optional, Union
 import argparse
 
-def compute_success_at_k(per_query_metrics, k_values=[1, 5, 10, 20, 50]):
+def compute_metrics(per_query_metrics, k_values=[1, 5, 10, 20, 50]):
     """
-    计算每个查询的Success@k指标
+    计算每个查询的Success@k和MRR@k指标
     
     Args:
         per_query_metrics: 每个查询的详细指标
@@ -28,164 +28,307 @@ def compute_success_at_k(per_query_metrics, k_values=[1, 5, 10, 20, 50]):
     """
     # 初始化汇总指标
     success_metrics = {f"success@{k}": 0.0 for k in k_values}
+    mrr_metrics = {f"mrr@{k}": 0.0 for k in k_values}
     
-    # 计算每个查询的Success@k
+    # 计算每个查询的Success@k和MRR@k
     for query_metrics in per_query_metrics:
         for k in k_values:
             recall_key = f"recall@{k}"
             success_key = f"success@{k}"
+            mrr_key = f"mrr@{k}"
             
-            # 如果有召回率指标，基于它计算成功率
+            # 如果已有对应k值的召回率
             if recall_key in query_metrics:
-                recall = query_metrics[recall_key]
-                # 只要有结果被召回（召回率>0），就算成功
-                success = 1.0 if recall > 0 else 0.0
-                query_metrics[success_key] = success
-                success_metrics[success_key] += success
+                # 计算Success@k：只要有一个相关结果，值为1，否则为0
+                query_metrics[success_key] = 1.0 if query_metrics[recall_key] > 0 else 0.0
+                success_metrics[success_key] += query_metrics[success_key]
+                
+                # 为该查询计算MRR@k
+                mrr_at_k = 0.0
+                # 遍历前k个结果找到第一个相关的排名
+                for i in range(1, k+1):
+                    # 如果是精确度@i > 0，则在第i个位置找到了相关文档
+                    precision_key = f"precision@{i}"
+                    if precision_key in query_metrics and query_metrics[precision_key] > 0:
+                        # MRR = 1/rank，其中rank是第一个相关文档的排名
+                        mrr_at_k = 1.0 / i
+                        break
+                
+                query_metrics[mrr_key] = mrr_at_k
+                mrr_metrics[mrr_key] += mrr_at_k
     
-    # 计算平均成功率
-    num_queries = len(per_query_metrics)
-    if num_queries > 0:
+    # 计算平均值
+    if per_query_metrics:
+        num_queries = len(per_query_metrics)
         for k in k_values:
             success_metrics[f"success@{k}"] /= num_queries
+            mrr_metrics[f"mrr@{k}"] /= num_queries
     
-    return per_query_metrics, success_metrics
+    return per_query_metrics, success_metrics, mrr_metrics
 
-def update_results_json(input_file, output_file=None):
+def update_results_json(json_file, output_file=None):
     """
-    更新评估结果JSON文件，添加Success@k指标
+    读取评估结果JSON文件，计算并添加Success@k和MRR@k指标
     
     Args:
-        input_file: 输入JSON文件路径
-        output_file: 输出JSON文件路径，如果为None则覆盖输入文件
-    """
-    if output_file is None:
-        output_file = input_file
-    
-    # 读取JSON文件
-    print(f"读取评估结果: {input_file}")
-    with open(input_file, 'r', encoding='utf-8') as f:
-        results = json.load(f)
-    
-    k_values = [1, 5, 10, 20, 50]
-    
-    # 更新每个模型的结果
-    for model, model_results in results.items():
-        print(f"更新 {model} 模型的Success@k指标...")
+        json_file: 输入的JSON文件路径
+        output_file: 输出的JSON文件路径，如果为None则覆盖输入文件
         
-        # 如果存在per_query字段，更新每个查询的Success@k
-        if "per_query" in model_results:
-            per_query_metrics = model_results["per_query"]
-            updated_per_query, success_metrics = compute_success_at_k(per_query_metrics, k_values)
+    Returns:
+        bool: 操作是否成功
+    """
+    try:
+        # 读取JSON文件
+        with open(json_file, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        print(f"加载评估结果文件: {json_file}")
+        
+        # 遍历每个模型的结果
+        for model_name, model_results in results.items():
+            print(f"处理模型: {model_name}")
             
-            # 更新结果
+            # 获取每个查询的指标
+            if "per_query" not in model_results:
+                print(f"  警告: 模型 {model_name} 没有per_query数据，跳过")
+                continue
+            
+            per_query_metrics = model_results["per_query"]
+            
+            # 计算Success@k和MRR@k指标
+            updated_per_query, success_metrics, mrr_metrics = compute_metrics(per_query_metrics)
+            
+            # 更新每个查询的指标
             model_results["per_query"] = updated_per_query
             
-            # 将汇总指标添加到模型结果中
-            for k, v in success_metrics.items():
-                model_results[k] = v
+            # 更新汇总指标
+            for k, value in success_metrics.items():
+                model_results[k] = value
+                print(f"  添加 {k}: {value:.4f}")
+            
+            for k, value in mrr_metrics.items():
+                model_results[k] = value
+                print(f"  添加 {k}: {value:.4f}")
+        
+        # 保存更新后的结果
+        if output_file is None:
+            output_file = json_file
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        
+        print(f"结果已保存到: {output_file}")
+        return True
     
-    # 保存更新后的结果
-    print(f"保存更新后的结果: {output_file}")
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"处理文件时出错: {e}")
+        return False
 
-def update_summary_csv(json_file, csv_file):
+def update_csv_summary(json_file, csv_file, output_csv=None):
     """
-    根据更新后的JSON结果，更新汇总CSV文件
+    根据更新后的JSON文件，更新CSV汇总文件
     
     Args:
         json_file: 更新后的JSON文件路径
-        csv_file: 原始CSV文件路径
+        csv_file: 原始CSV汇总文件路径
+        output_csv: 输出的CSV文件路径，如果为None则覆盖输入文件
+    
+    Returns:
+        bool: 操作是否成功
     """
-    # 读取JSON文件
-    with open(json_file, 'r', encoding='utf-8') as f:
-        results = json.load(f)
-    
-    # 生成汇总数据
-    summary = {
-        "model": [],
-        "mAP": [],
-    }
-    
-    # 添加指标
-    k_values = [1, 5, 10, 20, 50]
-    for k in k_values:
-        summary[f"recall@{k}"] = []
-        summary[f"precision@{k}"] = []
-        summary[f"success@{k}"] = []
-    
-    # 添加各模型的结果
-    for model, model_results in results.items():
-        summary["model"].append(model)
-        summary["mAP"].append(model_results.get("mAP", float('nan')))
+    try:
+        # 读取JSON文件
+        with open(json_file, 'r', encoding='utf-8') as f:
+            results = json.load(f)
         
+        # 创建新的汇总数据
+        summary = {
+            "model": [],
+            "mAP": [],
+        }
+        
+        # 添加各类指标
+        k_values = [1, 5, 10, 20, 50]
         for k in k_values:
-            summary[f"recall@{k}"].append(model_results.get(f"recall@{k}", float('nan')))
-            summary[f"precision@{k}"].append(model_results.get(f"precision@{k}", float('nan')))
-            summary[f"success@{k}"].append(model_results.get(f"success@{k}", float('nan')))
+            summary[f"recall@{k}"] = []
+            summary[f"precision@{k}"] = []
+            summary[f"success@{k}"] = []
+            summary[f"mrr@{k}"] = []
+        
+        # 添加各模型的结果
+        for model, model_results in results.items():
+            summary["model"].append(model)
+            summary["mAP"].append(model_results.get("mAP", float('nan')))
+            
+            for k in k_values:
+                recall_key = f"recall@{k}"
+                precision_key = f"precision@{k}"
+                success_key = f"success@{k}"
+                mrr_key = f"mrr@{k}"
+                
+                summary[recall_key].append(model_results.get(recall_key, float('nan')))
+                summary[precision_key].append(model_results.get(precision_key, float('nan')))
+                summary[success_key].append(model_results.get(success_key, float('nan')))
+                summary[mrr_key].append(model_results.get(mrr_key, float('nan')))
+        
+        # 创建DataFrame并保存为CSV
+        summary_df = pd.DataFrame(summary)
+        
+        if output_csv is None:
+            output_csv = csv_file
+        
+        summary_df.to_csv(output_csv, index=False)
+        print(f"CSV汇总已更新并保存到: {output_csv}")
+        return True
     
-    # 创建DataFrame并保存
-    summary_df = pd.DataFrame(summary)
-    summary_df.to_csv(csv_file, index=False)
-    print(f"汇总报告已更新: {csv_file}")
+    except Exception as e:
+        print(f"更新CSV汇总时出错: {e}")
+        return False
 
-def create_success_plot(json_file, output_dir):
+def setup_chinese_font():
+    """配置matplotlib中文字体支持"""
+    try:
+        import matplotlib as mpl
+        import platform
+        
+        system = platform.system()
+        
+        if system == 'Windows':
+            # Windows字体
+            mpl.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS']
+        elif system == 'Darwin':  # macOS
+            # macOS字体
+            mpl.rcParams['font.sans-serif'] = ['PingFang SC', 'Heiti SC', 'STHeiti', 'Arial Unicode MS']
+        else:  # Linux等
+            # Linux字体
+            mpl.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei', 'Droid Sans Fallback', 'Arial Unicode MS']
+            
+        # 通用设置，解决负号显示问题
+        mpl.rcParams['axes.unicode_minus'] = False
+        
+        # 设置DPI，确保图像清晰
+        mpl.rcParams['figure.dpi'] = 100
+        
+        print("中文字体配置完成")
+        return True
+    except Exception as e:
+        print(f"配置中文字体时出错: {e}")
+        return False
+
+def plot_metrics(json_file, output_dir):
     """
-    创建Success@k对比图
+    根据JSON文件绘制各种指标的对比图
     
     Args:
-        json_file: JSON结果文件路径
-        output_dir: 输出目录
+        json_file: 包含评估结果的JSON文件路径
+        output_dir: 输出图表的目录
+        
+    Returns:
+        bool: 操作是否成功
     """
-    # 读取JSON文件
-    with open(json_file, 'r', encoding='utf-8') as f:
-        results = json.load(f)
+    try:
+        # 读取JSON文件
+        with open(json_file, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        # 确保输出目录存在
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 配置中文字体支持
+        # setup_chinese_font()  # 由于系统原因无法生效，改用英文
+        
+        # 绘制各种指标的对比图
+        k_values = [1, 5, 10, 20, 50]
+        width = 0.35
+        x = np.arange(len(k_values))
+        
+        # 绘制Success@k对比图
+        plt.figure(figsize=(10, 6))
+        
+        for i, (model, model_results) in enumerate(results.items()):
+            successes = [model_results.get(f"success@{k}", 0) for k in k_values]
+            plt.bar(x + i*width, successes, width, label=model.upper())
+        
+        plt.xlabel('K Value')
+        plt.ylabel('Success Rate')
+        plt.title('Success Rate Comparison at Different K Values (Success@k)')
+        plt.xticks(x + width/2, [f"@{k}" for k in k_values])
+        plt.legend()
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.ylim(0, 1.0)  # 成功率是0-1的值
+        
+        # 保存图表
+        plt.tight_layout()
+        success_plot_file = os.path.join(output_dir, "success_comparison.png")
+        plt.savefig(success_plot_file, dpi=300)
+        print(f"Success rate comparison chart saved to: {success_plot_file}")
+        
+        # 绘制MRR@k对比图
+        plt.figure(figsize=(10, 6))
+        
+        for i, (model, model_results) in enumerate(results.items()):
+            mrrs = [model_results.get(f"mrr@{k}", 0) for k in k_values]
+            plt.bar(x + i*width, mrrs, width, label=model.upper())
+        
+        plt.xlabel('K Value')
+        plt.ylabel('Mean Reciprocal Rank')
+        plt.title('Mean Reciprocal Rank Comparison at Different K Values (MRR@k)')
+        plt.xticks(x + width/2, [f"@{k}" for k in k_values])
+        plt.legend()
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.ylim(0, 1.0)  # MRR是0-1的值
+        
+        # 保存图表
+        plt.tight_layout()
+        mrr_plot_file = os.path.join(output_dir, "mrr_comparison.png")
+        plt.savefig(mrr_plot_file, dpi=300)
+        print(f"MRR comparison chart saved to: {mrr_plot_file}")
+        
+        return True
     
-    # 绘制Success@k对比图
-    plt.figure(figsize=(10, 6))
-    
-    k_values = [1, 5, 10, 20, 50]
-    width = 0.35
-    x = np.arange(len(k_values))
-    
-    for i, (model, model_results) in enumerate(results.items()):
-        successes = [model_results.get(f"success@{k}", 0) for k in k_values]
-        plt.bar(x + i*width, successes, width, label=model.upper())
-    
-    plt.xlabel('K值')
-    plt.ylabel('成功率')
-    plt.title('不同模型在各K值下的成功率对比 (Success@k)')
-    plt.xticks(x + width/2, [f"@{k}" for k in k_values])
-    plt.legend()
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.ylim(0, 1.0)
-    
-    # 保存图表
-    plt.tight_layout()
-    success_plot_file = os.path.join(output_dir, "success_comparison.png")
-    plt.savefig(success_plot_file, dpi=300)
-    print(f"成功率对比图已保存: {success_plot_file}")
+    except Exception as e:
+        print(f"Error generating metrics charts: {e}")
+        return False
 
 def main():
-    parser = argparse.ArgumentParser(description="更新评估结果，添加Success@k指标")
-    parser.add_argument("--results_dir", type=str, default="./results", help="结果目录")
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='更新评估结果，添加Success@k和MRR@k指标')
+    parser.add_argument('--input_json', type=str, required=True, help='输入的评估结果JSON文件路径')
+    parser.add_argument('--input_csv', type=str, help='输入的CSV汇总文件路径')
+    parser.add_argument('--output_json', type=str, help='输出的JSON文件路径，默认覆盖输入文件')
+    parser.add_argument('--output_csv', type=str, help='输出的CSV文件路径，默认覆盖输入文件')
+    parser.add_argument('--output_dir', type=str, help='输出图表的目录，默认使用JSON文件所在目录')
+    
     args = parser.parse_args()
     
-    # 构建文件路径
-    json_file = os.path.join(args.results_dir, "retrieval_results.json")
-    csv_file = os.path.join(args.results_dir, "retrieval_summary.csv")
+    # 设置默认输出路径
+    if args.output_json is None:
+        args.output_json = args.input_json
     
-    # 更新JSON结果
-    update_results_json(json_file)
+    if args.output_dir is None:
+        args.output_dir = os.path.dirname(args.input_json)
     
-    # 更新汇总CSV
-    update_summary_csv(json_file, csv_file)
+    # 更新JSON文件
+    success = update_results_json(args.input_json, args.output_json)
+    if not success:
+        return 1
     
-    # 创建Success@k对比图
-    create_success_plot(json_file, args.results_dir)
+    # 如果提供了CSV文件，也更新它
+    if args.input_csv:
+        if args.output_csv is None:
+            args.output_csv = args.input_csv
+        
+        success = update_csv_summary(args.output_json, args.input_csv, args.output_csv)
+        if not success:
+            print("警告: CSV更新失败，但JSON更新成功")
     
-    print(f"Success@k指标更新完成")
+    # 绘制指标对比图
+    success = plot_metrics(args.output_json, args.output_dir)
+    if not success:
+        print("警告: 绘图失败，但指标更新成功")
+    
+    print("处理完成!")
+    return 0
 
 if __name__ == "__main__":
-    main() 
+    exit(main()) 

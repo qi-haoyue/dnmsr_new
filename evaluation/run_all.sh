@@ -229,6 +229,55 @@ run_evaluation() {
     return 0
 }
 
+# 生成检索示例分析
+generate_examples() {
+    print_info "开始生成检索示例分析..."
+    
+    # 检查评估结果文件是否存在
+    if ! check_file_exists "$RESULTS_DIR/retrieval_results.json"; then
+        print_error "无法继续，评估结果文件不存在"
+        return 1
+    fi
+    
+    # 检查嵌入文件是否存在
+    if ! check_dir_exists "$EMBEDDING_DIR"; then
+        print_error "无法继续，嵌入目录不存在"
+        return 1
+    fi
+    
+    # 检查候选文档文件是否存在
+    if ! check_file_exists "$CANDIDATES_FILE"; then
+        print_warning "候选文档文件不存在，将无法显示文档内容"
+        CANDIDATES_PARAM=""
+    else
+        CANDIDATES_PARAM="--candidates_file $CANDIDATES_FILE"
+    fi
+    
+    # 运行检索示例分析脚本
+    print_info "运行检索示例分析脚本..."
+    python "$SCRIPT_DIR/generate_examples.py" \
+           --results_file "$RESULTS_DIR/retrieval_results.json" \
+           --embedding_dir "$EMBEDDING_DIR" \
+           --output_dir "$RESULTS_DIR" \
+           --num_examples 10 \
+           --top_k 10 \
+           $CANDIDATES_PARAM
+    
+    if [[ $? -ne 0 ]]; then
+        print_error "检索示例分析生成失败"
+        return 1
+    fi
+    
+    if check_file_exists "$RESULTS_DIR/retrieval_examples.txt"; then
+        print_success "检索示例分析生成成功"
+        echo "检索示例文件: $RESULTS_DIR/retrieval_examples.txt"
+        return 0
+    else
+        print_error "检索示例文件未生成"
+        return 1
+    fi
+}
+
 # 运行整个流程
 run_all() {
     print_info "开始运行完整评估流程..."
@@ -252,6 +301,13 @@ run_all() {
     if [[ $? -ne 0 ]]; then
         print_error "评估运行失败"
         return 1
+    fi
+    
+    # 4. 生成检索示例分析
+    generate_examples
+    if [[ $? -ne 0 ]]; then
+        print_error "检索示例分析生成失败"
+        # 继续执行，不中断流程
     fi
     
     print_success "完整评估流程运行成功"
@@ -316,10 +372,11 @@ show_menu() {
     echo "4) 生成采样和候选文档"
     echo "5) 构建嵌入向量"
     echo "6) 运行检索评估"
-    echo "7) 运行完整评估流程"
+    echo "7) 生成检索示例分析"
+    echo "8) 运行完整评估流程"
     echo "0) 退出"
     echo "=================================="
-    read -p "请选择操作 [0-7]: " choice
+    read -p "请选择操作 [0-8]: " choice
     
     case $choice in
         1) show_config ;;
@@ -328,7 +385,8 @@ show_menu() {
         4) generate_samples ;;
         5) build_embeddings ;;
         6) run_evaluation ;;
-        7) run_all ;;
+        7) generate_examples ;;
+        8) run_all ;;
         0) print_info "退出程序"; exit 0 ;;
         *) print_error "无效选择" ;;
     esac
