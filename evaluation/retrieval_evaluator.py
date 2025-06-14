@@ -22,7 +22,8 @@ class RetrievalEvaluator:
     def __init__(
         self,
         embeddings_dir: str = "./embeddings",
-        output_dir: str = "./results"
+        output_dir: str = "./results",
+        mode: str = "multimodal"  # 检索模式: multimodal, text_to_image, image_to_text
     ):
         """
         初始化检索评估器
@@ -30,9 +31,21 @@ class RetrievalEvaluator:
         Args:
             embeddings_dir: 嵌入文件目录
             output_dir: 结果输出目录
+            mode: 检索模式，可选值为 'multimodal'(多模态混合检索), 'text_to_image'(文搜图), 'image_to_text'(图搜文)
         """
         self.embeddings_dir = embeddings_dir
         self.output_dir = output_dir
+        self.mode = mode
+        
+        # 根据模式设置评估名称
+        self.mode_name_map = {
+            "multimodal": "多模态混合检索",
+            "text_to_image": "文搜图检索",
+            "image_to_text": "图搜文检索"
+        }
+        self.mode_name = self.mode_name_map.get(mode, "未知模式")
+        
+        print(f"初始化检索评估器，模式: {self.mode_name}")
         
         # 确保输出目录存在
         os.makedirs(output_dir, exist_ok=True)
@@ -41,6 +54,7 @@ class RetrievalEvaluator:
         self.query_embeddings_dnmsr = None
         self.query_embeddings_clip = None
         self.query_product_ids = None
+        self.query_modalities = None  # 查询模态
         
         self.gallery_embeddings_dnmsr = None
         self.gallery_product_ids_dnmsr = None
@@ -48,6 +62,7 @@ class RetrievalEvaluator:
         
         self.gallery_embeddings_clip = None
         self.gallery_product_ids_clip = None
+        self.gallery_modalities_clip = None
         
         # 评估结果
         self.results = {}
@@ -72,6 +87,11 @@ class RetrievalEvaluator:
             self.query_embeddings_dnmsr = query_data["dnmsr_embeddings"]
             self.query_embeddings_clip = query_data["clip_embeddings"]
             self.query_product_ids = query_data["product_ids"]
+            
+            # 尝试加载查询模态信息（如果存在）
+            if "modalities" in query_data:
+                self.query_modalities = query_data["modalities"]
+                print(f"加载了查询模态信息: {len(set(self.query_modalities))}种模态")
             
             print(f"加载了 {len(self.query_product_ids)} 个查询嵌入")
             
@@ -98,17 +118,98 @@ class RetrievalEvaluator:
                 clip_gallery_data = np.load(clip_gallery_file, allow_pickle=True)
                 self.gallery_embeddings_clip = clip_gallery_data["embeddings"]
                 self.gallery_product_ids_clip = clip_gallery_data["product_ids"]
+                if "modalities" in clip_gallery_data:
+                    self.gallery_modalities_clip = clip_gallery_data["modalities"]
                 
                 print(f"加载了 {len(self.gallery_product_ids_clip)} 个EVA-CLIP候选文档嵌入")
             else:
                 print(f"警告: EVA-CLIP候选文档嵌入文件不存在: {clip_gallery_file}")
                 print(f"将跳过EVA-CLIP评估")
             
+            # 对于特定检索模式，过滤查询和候选文档
+            self._filter_data_by_mode()
+            
             return True
             
         except Exception as e:
             print(f"加载嵌入数据时出错: {e}")
             return False
+    
+    def _filter_data_by_mode(self):
+        """根据检索模式过滤数据"""
+        print(f"根据检索模式 {self.mode_name} 过滤数据...")
+        
+        # 由于数据加载时可能同时包含不同模态的查询和候选，
+        # 在此处根据检索模式进行过滤
+        if self.mode == "text_to_image":
+            # 文搜图模式：查询为文本，候选为图像
+            # 过滤查询为文本模态
+            if self.query_modalities is not None:
+                text_indices = np.array([i for i, mod in enumerate(self.query_modalities) if mod == 'text'])
+                if len(text_indices) > 0:
+                    print(f"过滤查询：保留 {len(text_indices)}/{len(self.query_modalities)} 个文本查询")
+                    self.query_embeddings_dnmsr = self.query_embeddings_dnmsr[text_indices]
+                    self.query_embeddings_clip = self.query_embeddings_clip[text_indices]
+                    self.query_product_ids = self.query_product_ids[text_indices]
+                    self.query_modalities = self.query_modalities[text_indices]
+                else:
+                    print("警告：未找到文本模态的查询")
+            
+            # 过滤候选为image模态（仅保留image模态，严格排除text和multimodal模态）
+            if self.gallery_modalities_dnmsr is not None:
+                image_indices = np.array([i for i, mod in enumerate(self.gallery_modalities_dnmsr) if mod == 'image'])
+                if len(image_indices) > 0:
+                    print(f"过滤候选：保留 {len(image_indices)}/{len(self.gallery_modalities_dnmsr)} 个图像候选")
+                    self.gallery_embeddings_dnmsr = self.gallery_embeddings_dnmsr[image_indices]
+                    self.gallery_product_ids_dnmsr = self.gallery_product_ids_dnmsr[image_indices]
+                    self.gallery_modalities_dnmsr = self.gallery_modalities_dnmsr[image_indices]
+                else:
+                    print("警告：未找到图像模态的候选")
+                    
+            # 对CLIP候选也执行相同操作
+            if self.gallery_modalities_clip is not None and self.gallery_embeddings_clip is not None:
+                image_indices = np.array([i for i, mod in enumerate(self.gallery_modalities_clip) if mod == 'image'])
+                if len(image_indices) > 0:
+                    print(f"过滤CLIP候选：保留 {len(image_indices)}/{len(self.gallery_modalities_clip)} 个图像候选")
+                    self.gallery_embeddings_clip = self.gallery_embeddings_clip[image_indices]
+                    self.gallery_product_ids_clip = self.gallery_product_ids_clip[image_indices]
+                    self.gallery_modalities_clip = self.gallery_modalities_clip[image_indices]
+                    
+        elif self.mode == "image_to_text":
+            # 图搜文模式：查询为图像，候选为文本
+            # 过滤查询为图像模态
+            if self.query_modalities is not None:
+                image_indices = np.array([i for i, mod in enumerate(self.query_modalities) if mod == 'image'])
+                if len(image_indices) > 0:
+                    print(f"过滤查询：保留 {len(image_indices)}/{len(self.query_modalities)} 个图像查询")
+                    self.query_embeddings_dnmsr = self.query_embeddings_dnmsr[image_indices]
+                    self.query_embeddings_clip = self.query_embeddings_clip[image_indices]
+                    self.query_product_ids = self.query_product_ids[image_indices]
+                    self.query_modalities = self.query_modalities[image_indices]
+                else:
+                    print("警告：未找到图像模态的查询")
+            
+            # 过滤候选为文本模态（仅保留text模态，严格排除image和multimodal模态）
+            if self.gallery_modalities_dnmsr is not None:
+                text_indices = np.array([i for i, mod in enumerate(self.gallery_modalities_dnmsr) if mod == 'text'])
+                if len(text_indices) > 0:
+                    print(f"过滤候选：保留 {len(text_indices)}/{len(self.gallery_modalities_dnmsr)} 个文本候选")
+                    self.gallery_embeddings_dnmsr = self.gallery_embeddings_dnmsr[text_indices]
+                    self.gallery_product_ids_dnmsr = self.gallery_product_ids_dnmsr[text_indices]
+                    self.gallery_modalities_dnmsr = self.gallery_modalities_dnmsr[text_indices]
+                else:
+                    print("警告：未找到文本模态的候选")
+                    
+            # 对CLIP候选也执行相同操作
+            if self.gallery_modalities_clip is not None and self.gallery_embeddings_clip is not None:
+                text_indices = np.array([i for i, mod in enumerate(self.gallery_modalities_clip) if mod == 'text'])
+                if len(text_indices) > 0:
+                    print(f"过滤CLIP候选：保留 {len(text_indices)}/{len(self.gallery_modalities_clip)} 个文本候选")
+                    self.gallery_embeddings_clip = self.gallery_embeddings_clip[text_indices]
+                    self.gallery_product_ids_clip = self.gallery_product_ids_clip[text_indices]
+                    self.gallery_modalities_clip = self.gallery_modalities_clip[text_indices]
+        
+        # 多模态混合检索模式下不需要过滤，保持原始数据
     
     def normalize_embeddings(self) -> None:
         """标准化嵌入向量"""
@@ -247,6 +348,35 @@ class RetrievalEvaluator:
             gallery_embeddings = gallery_embeddings[..., :min_dim]
             print(f"调整后 - 查询形状: {query_embeddings.shape}, 候选形状: {gallery_embeddings.shape}")
         
+        # 再次检查模态过滤，确保只使用符合当前模式的候选文档
+        if gallery_modalities is not None and self.mode != "multimodal":
+            print(f"检查候选文档模态是否符合{self.mode_name}要求...")
+            
+            # 根据模式确定需要的模态
+            target_modality = None
+            if self.mode == "text_to_image":
+                target_modality = "image"
+            elif self.mode == "image_to_text":
+                target_modality = "text"
+                
+            if target_modality:
+                # 找出符合目标模态的索引
+                valid_indices = np.array([i for i, mod in enumerate(gallery_modalities) if mod == target_modality])
+                
+                if len(valid_indices) > 0:
+                    print(f"过滤候选：保留 {len(valid_indices)}/{len(gallery_modalities)} 个{target_modality}模态候选")
+                    gallery_embeddings = gallery_embeddings[valid_indices]
+                    gallery_product_ids = gallery_product_ids[valid_indices]
+                    gallery_modalities = gallery_modalities[valid_indices]
+                    print(f"过滤后 - 候选形状: {gallery_embeddings.shape}")
+                else:
+                    print(f"警告：没有找到{target_modality}模态的候选文档，无法进行{self.mode_name}评估")
+                    # 返回空结果
+                    return {
+                        "num_queries": 0,
+                        "error": f"没有找到{target_modality}模态的候选文档"
+                    }
+        
         # 计算相似度矩阵
         similarity_matrix = self.compute_similarity_matrix(query_embeddings, gallery_embeddings)
         
@@ -378,18 +508,15 @@ class RetrievalEvaluator:
         return metrics
     
     def evaluate_all(self) -> None:
-        """评估所有检索任务"""
-        # 标准化嵌入
+        """评估所有模型的检索性能"""
+        print(f"开始评估所有模型在{self.mode_name}上的检索性能...")
+        
+        # 首先标准化嵌入向量
         self.normalize_embeddings()
         
-        # 初始化结果字典
-        self.results = {}
-        
         # 评估DNMSR模型
-        if (self.query_embeddings_dnmsr is not None and 
-            self.gallery_embeddings_dnmsr is not None):
-            print(f"评估DNMSR模型的检索性能...")
-            
+        if self.query_embeddings_dnmsr is not None and self.gallery_embeddings_dnmsr is not None:
+            print(f"评估DNMSR模型...")
             dnmsr_results = self.evaluate_retrieval(
                 query_embeddings=self.query_embeddings_dnmsr,
                 query_product_ids=self.query_product_ids,
@@ -398,48 +525,30 @@ class RetrievalEvaluator:
                 gallery_modalities=self.gallery_modalities_dnmsr,
                 name="DNMSR"
             )
-            
             self.results["dnmsr"] = dnmsr_results
             
-            print(f"DNMSR检索评估完成")
-            print(f"  mAP: {dnmsr_results['mAP']:.4f}")
-            for k in [1, 5, 10]:
-                print(f"  Recall@{k}: {dnmsr_results[f'recall@{k}']:.4f}")
-                print(f"  Precision@{k}: {dnmsr_results[f'precision@{k}']:.4f}")
-                print(f"  Success@{k}: {dnmsr_results[f'success@{k}']:.4f}")
-                print(f"  MRR@{k}: {dnmsr_results[f'mrr@{k}']:.4f}")
-            
-            if "modality_distribution" in dnmsr_results:
-                print(f"  模态分布:")
-                for modality, ratio in dnmsr_results["modality_distribution"].items():
-                    print(f"    {modality}: {ratio:.2%}")
-        
-        # 评估EVA-CLIP模型（仅图像检索）
+        # 评估EVA-CLIP模型，如果有嵌入
         if (self.query_embeddings_clip is not None and 
             self.gallery_embeddings_clip is not None):
-            print(f"评估EVA-CLIP模型的图像检索性能...")
-            
+            print(f"评估EVA-CLIP模型...")
             clip_results = self.evaluate_retrieval(
                 query_embeddings=self.query_embeddings_clip,
                 query_product_ids=self.query_product_ids,
                 gallery_embeddings=self.gallery_embeddings_clip,
                 gallery_product_ids=self.gallery_product_ids_clip,
+                gallery_modalities=self.gallery_modalities_clip,
                 name="EVA-CLIP"
             )
-            
             self.results["clip"] = clip_results
-            
-            print(f"EVA-CLIP检索评估完成")
-            print(f"  mAP: {clip_results['mAP']:.4f}")
-            for k in [1, 5, 10]:
-                print(f"  Recall@{k}: {clip_results[f'recall@{k}']:.4f}")
-                print(f"  Precision@{k}: {clip_results[f'precision@{k}']:.4f}")
-                print(f"  Success@{k}: {clip_results[f'success@{k}']:.4f}")
-                print(f"  MRR@{k}: {clip_results[f'mrr@{k}']:.4f}")
         
-        # 生成检索示例分析
-        self.generate_retrieval_examples()
+        # 保存评估结果到JSON文件
+        self.save_results()
         
+        # 生成比较图表
+        self._plot_performance_comparison()
+        
+        print(f"{self.mode_name}评估完成，结果已保存到: {self.output_dir}")
+
     def generate_retrieval_examples(self, num_examples=10, top_k=10):
         """
         生成检索示例分析，展示指定数量的查询及其检索结果
@@ -519,7 +628,7 @@ class RetrievalEvaluator:
                         gallery_modalities = self.gallery_modalities_dnmsr
                     elif model_name == "clip":
                         gallery_ids = self.gallery_product_ids_clip
-                        gallery_modalities = None  # CLIP模型可能没有模态信息
+                        gallery_modalities = self.gallery_modalities_clip
                         
                     if gallery_ids is None:
                         f.write(f"No gallery information available for {model_name}\n\n")
@@ -563,70 +672,96 @@ class RetrievalEvaluator:
         print(f"检索示例分析已保存到: {examples_file}")
         
     def save_results(self) -> None:
-        """保存评估结果"""
-        if not self.results:
-            print(f"没有评估结果可保存")
-            return
+        """保存评估结果到JSON文件"""
+        # 将NumPy数组转换为Python列表以便JSON序列化
+        for model, result in self.results.items():
+            for k, v in result.items():
+                if isinstance(v, np.ndarray):
+                    self.results[model][k] = v.tolist()
+                elif isinstance(v, dict):
+                    for sub_k, sub_v in v.items():
+                        if isinstance(sub_v, np.ndarray):
+                            self.results[model][k][sub_k] = sub_v.tolist()
         
-        print(f"保存评估结果到: {self.output_dir}")
-        
-        # 保存详细结果为JSON
-        results_file = os.path.join(self.output_dir, "retrieval_results.json")
-        with open(results_file, 'w', encoding='utf-8') as f:
-            json.dump(self.results, f, ensure_ascii=False, indent=2)
-        
-        print(f"详细结果已保存到: {results_file}")
-        
-        # 生成汇总报告
-        summary = {
-            "model": [],
-            "mAP": [],
+        # 添加元数据
+        metadata = {
+            "date": datetime.datetime.now().isoformat(),
+            "mode": self.mode,
+            "mode_name": self.mode_name,
+            "embeddings_dir": self.embeddings_dir
         }
         
-        # 添加recall、precision、success和mrr指标
-        k_values = [1, 5, 10, 20, 50]
-        for k in k_values:
-            summary[f"recall@{k}"] = []
-            summary[f"precision@{k}"] = []
-            summary[f"success@{k}"] = []
-            summary[f"mrr@{k}"] = []
+        # 构建完整结果
+        full_results = {
+            "metadata": metadata,
+            "results": self.results
+        }
         
-        # 添加各模型的结果
-        for model, results in self.results.items():
-            summary["model"].append(model)
-            summary["mAP"].append(results["mAP"])
+        # 确保输出目录存在
+        os.makedirs(self.output_dir, exist_ok=True)
+        
+        # 保存到JSON文件
+        output_path = os.path.join(self.output_dir, "retrieval_results.json")
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(full_results, f, ensure_ascii=False, indent=2)
             
-            for k in k_values:
-                if f"recall@{k}" in results:
-                    summary[f"recall@{k}"].append(results[f"recall@{k}"])
-                else:
-                    summary[f"recall@{k}"].append(float('nan'))
-                    
-                if f"precision@{k}" in results:
-                    summary[f"precision@{k}"].append(results[f"precision@{k}"])
-                else:
-                    summary[f"precision@{k}"].append(float('nan'))
-                    
-                if f"success@{k}" in results:
-                    summary[f"success@{k}"].append(results[f"success@{k}"])
-                else:
-                    summary[f"success@{k}"].append(float('nan'))
-                    
-                if f"mrr@{k}" in results:
-                    summary[f"mrr@{k}"].append(results[f"mrr@{k}"])
-                else:
-                    summary[f"mrr@{k}"].append(float('nan'))
+        print(f"评估结果已保存到: {output_path}")
         
-        # 创建DataFrame并保存为CSV
-        summary_df = pd.DataFrame(summary)
-        summary_file = os.path.join(self.output_dir, "retrieval_summary.csv")
-        summary_df.to_csv(summary_file, index=False)
+        # 生成汇总CSV
+        summary_data = []
+        for model_name, model_results in self.results.items():
+            # 收集MRR和成功率
+            mrr = model_results.get("mrr", 0)
+            success_rate = model_results.get("success_rate", 0)
+            
+            # 收集不同k值的MAP和Recall
+            for k in [1, 5, 10, 20, 50]:
+                map_value = model_results.get(f"map@{k}", 0)
+                recall = model_results.get(f"recall@{k}", 0)
+                precision = model_results.get(f"precision@{k}", 0)
+                
+                summary_data.append({
+                    "模型": model_name,
+                    "指标": f"MAP@{k}",
+                    "值": map_value
+                })
+                
+                summary_data.append({
+                    "模型": model_name,
+                    "指标": f"召回率@{k}",
+                    "值": recall
+                })
+                
+                summary_data.append({
+                    "模型": model_name,
+                    "指标": f"精确率@{k}",
+                    "值": precision
+                })
+                
+            # 添加MRR和成功率
+            summary_data.append({
+                "模型": model_name,
+                "指标": "MRR",
+                "值": mrr
+            })
+            
+            summary_data.append({
+                "模型": model_name,
+                "指标": "成功率",
+                "值": success_rate
+            })
         
-        print(f"汇总报告已保存到: {summary_file}")
-        
-        # 绘制性能对比图
-        self._plot_performance_comparison()
-    
+        # 创建DataFrame并保存CSV
+        if summary_data:
+            df = pd.DataFrame(summary_data)
+            
+            # 按模型和指标排序
+            df = df.sort_values(["模型", "指标"])
+            
+            csv_path = os.path.join(self.output_dir, "retrieval_summary.csv")
+            df.to_csv(csv_path, index=False, encoding='utf-8')
+            print(f"评估汇总已保存到: {csv_path}")
+
     def _plot_performance_comparison(self) -> None:
         """绘制性能对比图"""
         if not self.results:
@@ -767,29 +902,32 @@ class RetrievalEvaluator:
 
 def main():
     # 解析命令行参数
-    parser = argparse.ArgumentParser(description="评估DNMSR和EVA-CLIP模型的检索性能")
-    parser.add_argument("--embeddings_dir", type=str, default="./embeddings", help="嵌入文件目录")
-    parser.add_argument("--output_dir", type=str, default="./results", help="结果输出目录")
+    parser = argparse.ArgumentParser(description="DNMSR检索评估工具")
+    parser.add_argument('--embeddings_dir', type=str, required=True, help='嵌入向量目录')
+    parser.add_argument('--output_dir', type=str, required=True, help='结果输出目录')
+    parser.add_argument('--mode', type=str, default='multimodal', choices=['multimodal', 'text_to_image', 'image_to_text'], 
+                       help='检索模式：multimodal(多模态混合检索), text_to_image(文搜图), image_to_text(图搜文)')
     args = parser.parse_args()
     
     # 初始化评估器
     evaluator = RetrievalEvaluator(
         embeddings_dir=args.embeddings_dir,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        mode=args.mode
     )
     
     # 加载嵌入
     if not evaluator.load_embeddings():
-        print(f"加载嵌入数据失败，退出评估")
+        print("加载嵌入数据失败，退出评估")
         return
     
-    # 评估检索性能
+    # 评估所有模型的检索性能
     evaluator.evaluate_all()
     
-    # 保存结果
-    evaluator.save_results()
+    # 生成检索示例分析
+    # evaluator.generate_retrieval_examples(num_examples=10, top_k=10)
     
-    print(f"检索评估完成")
+    print("评估完成")
 
 if __name__ == "__main__":
     main() 

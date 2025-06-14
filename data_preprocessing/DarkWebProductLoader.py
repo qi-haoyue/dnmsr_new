@@ -7,6 +7,7 @@ from tqdm import tqdm
 import random
 import numpy as np
 from collections import OrderedDict
+import argparse
 
 
 # (模型加载代码，同上一方案，此处省略)
@@ -375,6 +376,9 @@ class DarkWebProductLoader:
             output_file: 输出文件路径
         """
         try:
+            # 确保输出目录存在
+            os.makedirs(os.path.dirname(output_file), exist_ok=True)
+            
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(products, f, ensure_ascii=False, indent=2)
             print(f"Successfully saved {len(products)} sampled products to {output_file}")
@@ -393,6 +397,9 @@ class DarkWebProductLoader:
             return
             
         try:
+            # 确保输出目录存在
+            os.makedirs(os.path.dirname(output_file), exist_ok=True)
+            
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(self.candidate_documents, f, ensure_ascii=False, indent=2)
             
@@ -663,70 +670,39 @@ class DarkWebProductLoader:
                 
 # 示例用法
 def main():
-    # 配置路径 - 根据实际环境修改
-    # 支持多种环境的路径配置
-    possible_paths = [
-        # 远程服务器路径
-        {
-            "json_path": "/home/qhy/MML/DNM_dataset/changan/ca_fixed.json",
-            "image_path": "/home/qhy/MML/DNM_dataset/changan/pic/full"
-        },
-        # 本地开发路径
-        {
-            "json_path": "./changan/ca_fixed.json",
-            "image_path": "./changan/pic/full"
-        }
-    ]
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description="暗网商品数据加载与处理工具")
+    parser.add_argument("--json_file", required=True, help="包含商品信息的JSON文件路径")
+    parser.add_argument("--image_dir", required=True, help="图像文件的根目录")
+    parser.add_argument("--samples_output", required=True, help="采样商品输出文件路径")
+    parser.add_argument("--candidates_output", required=True, help="候选文档输出文件路径")
+    parser.add_argument("--sample_size", type=int, default=100, help="要抽样的商品数量")
     
-    # 选择第一个有效的路径配置
-    JSON_FILE_PATH = None
-    IMAGE_ROOT_PATH = None
+    args = parser.parse_args()
     
-    for path_config in possible_paths:
-        if os.path.exists(path_config["json_path"]):
-            JSON_FILE_PATH = path_config["json_path"]
-            IMAGE_ROOT_PATH = path_config["image_path"]
-            break
-    
-    # 如果找不到有效路径，使用默认路径
-    if JSON_FILE_PATH is None:
-        JSON_FILE_PATH = "./changan/ca_fixed.json"
-        IMAGE_ROOT_PATH = "./changan/pic/full"
-    
-    # 输出文件路径
-    os.makedirs("./samples", exist_ok=True)
-    SAMPLES_OUTPUT_FILE = "./samples/sampled_products.json"
-    CANDIDATES_OUTPUT_FILE = "./samples/candidate_documents.json"
-    
-    # 打印当前环境信息
-    print(f"当前工作目录: {os.getcwd()}")
-    print(f"JSON文件路径: {JSON_FILE_PATH}")
-    print(f"图像根目录: {IMAGE_ROOT_PATH}")
-    
-    # 检查JSON文件是否存在
-    if not os.path.exists(JSON_FILE_PATH):
-        print(f"错误: JSON文件不存在: {JSON_FILE_PATH}")
-        return
-    
-    # 检查图像目录是否存在
-    if not os.path.exists(IMAGE_ROOT_PATH):
-        print(f"错误: 图像根目录不存在: {IMAGE_ROOT_PATH}")
-        return
-    
+    # 确保输出目录存在
+    os.makedirs(os.path.dirname(args.samples_output), exist_ok=True)
+    os.makedirs(os.path.dirname(args.candidates_output), exist_ok=True)
+
+
+    print("\n=== 初始化暗网商品数据加载器 ===")
+    print(f"输出路径{args.samples_output} 和 {args.candidates_output} 已创建")
+    waiting_for_user = input("请确保图像目录已准备好，按回车继续...")
+
+
     # 初始化数据加载器
     loader = DarkWebProductLoader(
-    json_file_path=JSON_FILE_PATH,
-        image_root_path=IMAGE_ROOT_PATH,
+        json_file_path=args.json_file,
+        image_root_path=args.image_dir,
         random_seed=42
     )
     
-    # 探索图像目录结构，帮助诊断问题
+    # 探索图像目录结构
     print("\n=== 探索图像目录结构 ===")
     loader.explore_image_directory(max_depth=3)
     
-    # 随机抽样100个商品
-    sample_size = 100
-    sampled_products = loader.get_sampled_products(sample_size=sample_size)
+    # 随机抽样商品
+    sampled_products = loader.get_sampled_products(sample_size=args.sample_size)
     print(f"\n=== 抽样了 {len(sampled_products)} 个商品进行评估 ===")
     
     # 确认所有采样商品有唯一ID
@@ -745,12 +721,11 @@ def main():
         sampled_products = unique_products
     
     # 保存采样的商品
-    loader.save_samples(sampled_products, SAMPLES_OUTPUT_FILE)
-    print(f"保存了 {len(sampled_products)} 个采样商品到 {SAMPLES_OUTPUT_FILE}")
+    loader.save_samples(sampled_products, args.samples_output)
+    print(f"保存了 {len(sampled_products)} 个采样商品到 {args.samples_output}")
     
-    # 只为采样的商品生成多模态候选文档，而不是所有商品
+    # 为采样的商品生成多模态候选文档
     print(f"\n=== 为 {len(sampled_products)} 个采样商品生成多模态候选文档 ===")
-    # 重置现有的候选文档，确保不会混合以前的结果
     loader.candidate_documents = {"text_only": [], "image_only": [], "multimodal": []}
     all_candidates = loader.generate_multimodal_candidates(products=sampled_products)
     
@@ -768,12 +743,7 @@ def main():
         print(f"警告: {len(missing_ids)} 个采样商品未生成任何候选文档")
     
     # 保存生成的候选文档
-    loader.save_candidate_documents(CANDIDATES_OUTPUT_FILE)
-    
-    # 获取查询到真实答案的映射
-    ground_truth_mapping = loader.get_ground_truth_mapping(sampled_products)
-    
-    print(f"\n=== 为 {len(ground_truth_mapping)} 个查询生成了真实答案映射 ===")
+    loader.save_candidate_documents(args.candidates_output)
     
     # 总结检索评估准备情况
     print("\n=== 检索评估准备就绪情况 ===")
@@ -789,8 +759,6 @@ def main():
     if total_cands > 0:
         print(f"\n总共生成了 {total_cands} 个候选文档，可以进行检索评估。")
         print(f"注意: 这些候选文档仅来自于 {len(all_product_ids)} 个采样商品，而不是全部 {len(loader.all_product_items)} 个商品。")
-        if img_cands == 0 and mm_cands == 0:
-            print("警告: 只能进行文本检索评估，因为未找到有效图像。")
     else:
         print("\n错误: 没有生成任何候选文档，无法进行检索评估。")
 
