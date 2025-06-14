@@ -1,0 +1,262 @@
+# Text-to-Image Retrieval Example Analysis
+
+Generated: 2025-06-13 21:59:35
+Total text queries: 100
+Showing 10 random examples with top 10 image results each
+
+## Example 1: Query ID b73e56135b8c471c8babfc0db4293cdd
+
+**Query Text:** mega自助下载
+数据资源一经售出概不退换
+
+### DNMSR Model Results
+
+This query has 2 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | b7445848754449a48d7b96f5720abbff | 0.4960 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/Gmail账密3100w+，yahoo账密2100w+/ d97e15164e85404039b8b360840fd7385aa2657d.jpg |
+| 2 | 4dda8b1742794a3c8c64ceb2761b8771 | 0.4870 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2022美国相亲交友网4000条数据/ f21358458e5d3cedde6e2101673cc1dbb73651f9.jpg |
+| 3 | e75eb558208e476b90413608b4359e86 | 0.4780 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/最新  708.cc 博彩澳门新葡京渗透数据5万3千条/ d23bee08900310db4fa315d1abeea9d9d15fd3f3.jpg |
+| 4 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4770 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 5 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4770 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 6 | b695674b9d534d4d9a74e7a89372ae32 | 0.4770 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/中国二线明星蒋梦婕的裙底视频以及照片/ 2847ec823c221c43b1bb36ea0b93bfdca6574a8c.jpg |
+| 7 | b695674b9d534d4d9a74e7a89372ae32 | 0.4760 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/中国二线明星蒋梦婕的裙底视频以及照片/ 2847ec823c221c43b1bb36ea0b93bfdca6574a8c.jpg |
+| 8 | 4168e1294d724abab68b61c8488f028e | 0.4740 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/36G欧洲各国各网站邮箱数据/ bf906ccfa3a6d6b15fcacec50b966fed83d6fae7.jpg |
+| 9 | 61157e64cfce4c0cb58dddeb3faba612 | 0.4730 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 10 | 61157e64cfce4c0cb58dddeb3faba612 | 0.4730 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 2: Query ID 092cfc246ca64bb184f705453debdcbd
+
+**Query Text:** 4月30号-5月3号博彩充值数据50000条(三方支付平台)，每周更新，自动发货
+
+三方渠道的数据，只把博彩类的分出来了，最近3-4天的充值
+
+### DNMSR Model Results
+
+This query has 2 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | b73e56135b8c471c8babfc0db4293cdd | 0.5480 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/11G裸贷肉偿视频照片借贷宝联系方式身份证通讯录/ 54b1a85804c009690e830ad25ba2e80979b1b10c.jpg |
+| 2 | b73e56135b8c471c8babfc0db4293cdd | 0.5480 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/11G裸贷肉偿视频照片借贷宝联系方式身份证通讯录/ 54b1a85804c009690e830ad25ba2e80979b1b10c.jpg |
+| 3 | ad5ae2303cf84d34895b53b1e9409639 | 0.5220 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/无需599u也不需要49.90u，只需10u!【最新仿TokenPocket, Imtoken, MetaMask钱包】 私钥获取器!/ a5871efe73debe666b589db58e91292e440053bd.jpg |
+| 4 | e75eb558208e476b90413608b4359e86 | 0.5170 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/最新  708.cc 博彩澳门新葡京渗透数据5万3千条/ d23bee08900310db4fa315d1abeea9d9d15fd3f3.jpg |
+| 5 | 4168e1294d724abab68b61c8488f028e | 0.5150 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/36G欧洲各国各网站邮箱数据/ bf906ccfa3a6d6b15fcacec50b966fed83d6fae7.jpg |
+| 6 | b82555d90af04bfeb5d0881de3a368b3 | 0.5140 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/抖音网红『仙仙小草莓』高价私人定制全套45部高清情景自慰合集/ 4a1d1611e12e0ef203a06881c705aa3cb7d09a3b.jpg |
+| 7 | f628888907d34d7bafb8d2c719b8d3a0 | 0.5080 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/比特币钱包文件，批量打包出售，都有余额，但缺少密码/ 8292d513f95ee1da6e5b0a5b39997381e6a63903.jpg |
+| 8 | 092cfc246ca64bb184f705453debdcbd | 0.5040 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/4月30号-5月3号博彩充值数据50000条(三方支付平台)，每周更新，自动发货/ 5fef4114d3e088bb29afbd601144d82bcc6c48ed.jpg |
+| 9 | 092cfc246ca64bb184f705453debdcbd | 0.5040 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/4月30号-5月3号博彩充值数据50000条(三方支付平台)，每周更新，自动发货/ 5fef4114d3e088bb29afbd601144d82bcc6c48ed.jpg |
+| 10 | e270b232ae324950aafb0d677a5e3d5c | 0.5010 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/西班牙1300万 Phone House/ 52448eaac1dc460b228c6bbdad8f4bcf2aa75e7c.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 3: Query ID 4841f66373a84de08b643a00b5ee08a8
+
+**Query Text:** 2023出炉高学历大学生研究生9.6W，新库刚拖出来，格式齐全，大概包括姓名、电话、邮箱、地区、出生年月、毕业院校、专业、学历，其中还有1300条左右带身份证号码，具体情况看图，利用价值麻烦自己看下，...
+
+### DNMSR Model Results
+
+This query has 4 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | 7fc2f71cbf144122bb469647e4db63a8 | 0.5670 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/币安泄露数据库（2018-2019）/ e342d3f9c51faf2d5b8cfa33486f89155c57486d.jpg |
+| 2 | 7fc2f71cbf144122bb469647e4db63a8 | 0.5670 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/币安泄露数据库（2018-2019）/ e342d3f9c51faf2d5b8cfa33486f89155c57486d.jpg |
+| 3 | 61157e64cfce4c0cb58dddeb3faba612 | 0.5620 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 4 | 61157e64cfce4c0cb58dddeb3faba612 | 0.5620 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 5 | 8873fc0696224ab0a21e388bc64aa350 | 0.5600 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/30+加拿大手持驾照/ 6bd237ba1e6da942dbad83a707d2390a42eb341b.jpg |
+| 6 | 8873fc0696224ab0a21e388bc64aa350 | 0.5600 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/30+加拿大手持驾照/ 6bd237ba1e6da942dbad83a707d2390a42eb341b.jpg |
+| 7 | 4dda8b1742794a3c8c64ceb2761b8771 | 0.5520 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2022美国相亲交友网4000条数据/ f21358458e5d3cedde6e2101673cc1dbb73651f9.jpg |
+| 8 | 4dda8b1742794a3c8c64ceb2761b8771 | 0.5520 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2022美国相亲交友网4000条数据/ f21358458e5d3cedde6e2101673cc1dbb73651f9.jpg |
+| 9 | b7445848754449a48d7b96f5720abbff | 0.5510 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/Gmail账密3100w+，yahoo账密2100w+/ d97e15164e85404039b8b360840fd7385aa2657d.jpg |
+| 10 | 897cec0a5b9c464185892d55d46cce2d | 0.5510 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/澳大利亚公民数据30W/ b756deb937285f6a8232dccea37a652d9aef14a8.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 4: Query ID fc58a1a390254cba9e49638042f6bf3a
+
+**Query Text:** 数据不贵都是真实的，mega自动发货。数据真实，虚拟产品的可复制性不支持退货。付款之后麻烦确认收货。（包括，企业名，注册号，法人地址，公司地址，经营范围， 企业注册时间，企业联系人，企业联系人手机号码...
+
+### DNMSR Model Results
+
+This query has no relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | 9240ef42ab994e519288508174a8b76d | 0.5160 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/泰国化妆品购物用户10万条 / ba1e9703fb6f1f71a677a98694ffb30be564d7bf.jpg |
+| 2 | 9240ef42ab994e519288508174a8b76d | 0.5160 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/泰国化妆品购物用户10万条 / ba1e9703fb6f1f71a677a98694ffb30be564d7bf.jpg |
+| 3 | eb9c13c022f346ba954169d8936dad41 | 0.5000 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2023年4月份彩票玩家数据10w条自动发货/ 0bfc42456c5a594baef40754030ffafa58cc54d4.jpg |
+| 4 | ef6c68218f9a4466bbd4c7094a4136c6 | 0.4990 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/80348条 贷款数据（全国）/ 8d7548c40612bf6a0dced7e99233d3be9b6fe97d.jpg |
+| 5 | ef6c68218f9a4466bbd4c7094a4136c6 | 0.4990 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/80348条 贷款数据（全国）/ 8d7548c40612bf6a0dced7e99233d3be9b6fe97d.jpg |
+| 6 | ba5e99a68bb94999ad086a3ff904bb7f | 0.4970 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/12445 条投资人数据，内涵 手机号、微信、邮箱联系方式和投资方向等备注，google drive 下载/ ace415d2bafbb6e5e17c691fc576e809bae1d23c.jpg |
+| 7 | ba5e99a68bb94999ad086a3ff904bb7f | 0.4970 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/12445 条投资人数据，内涵 手机号、微信、邮箱联系方式和投资方向等备注，google drive 下载/ ace415d2bafbb6e5e17c691fc576e809bae1d23c.jpg |
+| 8 | ef6c68218f9a4466bbd4c7094a4136c6 | 0.4960 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/80348条 贷款数据（全国）/ 8d7548c40612bf6a0dced7e99233d3be9b6fe97d.jpg |
+| 9 | 7ad127a74a70490ca2d43833b112a71e | 0.4940 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/出售新皇利服务器权限,数据每月更新,刚拖的,绝对一手/ 74e3eabe4e10d08033356a6a00549c24761390f9.jpg |
+| 10 | ddb55e9eb8e740e49d2967417faeb7cb | 0.4920 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/湖南高中15W数据/ cbf6724180fbc4268636c8c9ccc9467403f37a2b.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 5: Query ID a5afc73e96f24bc5b9ed0aea0dcffb64
+
+**Query Text:** 有大量的裸持身份证视频 个人信息等
+
+### DNMSR Model Results
+
+This query has 3 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | b7445848754449a48d7b96f5720abbff | 0.4350 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/Gmail账密3100w+，yahoo账密2100w+/ d97e15164e85404039b8b360840fd7385aa2657d.jpg |
+| 2 | 61157e64cfce4c0cb58dddeb3faba612 | 0.4330 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 3 | 61157e64cfce4c0cb58dddeb3faba612 | 0.4330 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 4 | 092cfc246ca64bb184f705453debdcbd | 0.4200 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/4月30号-5月3号博彩充值数据50000条(三方支付平台)，每周更新，自动发货/ 5fef4114d3e088bb29afbd601144d82bcc6c48ed.jpg |
+| 5 | 092cfc246ca64bb184f705453debdcbd | 0.4200 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/4月30号-5月3号博彩充值数据50000条(三方支付平台)，每周更新，自动发货/ 5fef4114d3e088bb29afbd601144d82bcc6c48ed.jpg |
+| 6 | ddc33ef701c546d58c36502618e2cb95 | 0.4190 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/黑客工具包很多实用的工具/ aa6c2ea2ed1b938d4c5ff73f6905555a2dcc42ef.jpg |
+| 7 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4190 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 8 | 5a8fc6b35f4344b689b6c78e2a3d7df4 | 0.4180 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/十几个遗忘的比特币/ 4ddc5aad064fa50990075551ec15af6470ce9c5e.jpg |
+| 9 | b0d9586906224c9da7067f99649c4fb4 | 0.4160 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/√√√√√√√√√QQ精准客户4500万数据★★★★★★/ 6d07272f72ef3a54123890dc8dfd1c4995d83741.jpg |
+| 10 | b695674b9d534d4d9a74e7a89372ae32 | 0.4150 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/中国二线明星蒋梦婕的裙底视频以及照片/ 2847ec823c221c43b1bb36ea0b93bfdca6574a8c.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 6: Query ID 55457e7a53204fe396a19119dc0a75e8
+
+**Query Text:** ❤️人小瘾大❤️人前乖乖女，人后骚浪贱的学生母狗，皮肤超好，白白嫩嫩的，被口爆，颜射，射的头发上到处都是，叫床好听！
+拍下自动发货
+
+### DNMSR Model Results
+
+This query has 1 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | 10f59ac59ef4403782e80f8c7ba29639 | 0.4550 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/缅甸1分钟/ 122f150e6ee0ffdcb796bbd87bc904af96391734.jpg |
+| 2 | 10f59ac59ef4403782e80f8c7ba29639 | 0.4550 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/缅甸1分钟/ 122f150e6ee0ffdcb796bbd87bc904af96391734.jpg |
+| 3 | 9665846ac2c744db86fe2b22413d7b14 | 0.4530 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/翻车王伟哥足浴会所撩妹良家少妇女技师酒店开房2500元约的性欲大奶离异少妇把伟哥累死了/ d5d94c1b7b585665b7f1ea7e5c988a6fa05d6be8.jpg |
+| 4 | ec56369d020541098a48d4ee9e73115f | 0.4310 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据业务/试管婴儿供卵代孕包性别，干细胞临床应用。/ c66c6ae21a605160f7c0360fade68198eaad7a85.jpg |
+| 5 | b0d9586906224c9da7067f99649c4fb4 | 0.4250 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/√√√√√√√√√QQ精准客户4500万数据★★★★★★/ 6d07272f72ef3a54123890dc8dfd1c4995d83741.jpg |
+| 6 | 55457e7a53204fe396a19119dc0a75e8 | 0.4240 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/❤️人小瘾大❤️人前乖乖女，人后骚浪贱的学生母狗，皮肤超好，白白嫩嫩的，被口爆，颜射，射的头发上到处都是，叫床好听！/ a2cf94f89ff286411acbc525adb148d0c8cdb35f.jpg |
+| 7 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4110 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 8 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4110 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 9 | 9665846ac2c744db86fe2b22413d7b14 | 0.4010 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/翻车王伟哥足浴会所撩妹良家少妇女技师酒店开房2500元约的性欲大奶离异少妇把伟哥累死了/ d5d94c1b7b585665b7f1ea7e5c988a6fa05d6be8.jpg |
+| 10 | 9665846ac2c744db86fe2b22413d7b14 | 0.3930 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/翻车王伟哥足浴会所撩妹良家少妇女技师酒店开房2500元约的性欲大奶离异少妇把伟哥累死了/ d5d94c1b7b585665b7f1ea7e5c988a6fa05d6be8.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 7: Query ID 838d2c882fdf4f4ab373ac4358ca03df
+
+**Query Text:** 1.内容
+VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教...
+
+### DNMSR Model Results
+
+This query has 6 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | 838d2c882fdf4f4ab373ac4358ca03df | 0.4920 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教程/ 8a3045bc3b2fcf30bc35991cded10e93cd75b61e.jpg |
+| 2 | 838d2c882fdf4f4ab373ac4358ca03df | 0.4830 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教程/ 8a3045bc3b2fcf30bc35991cded10e93cd75b61e.jpg |
+| 3 | 2f775efc110c463885901e6328cfab9a | 0.4700 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/CraxsRat V3安卓手机远控/ e2439090fb916eb40ba7d4351f8944ba5074a923.jpg |
+| 4 | 838d2c882fdf4f4ab373ac4358ca03df | 0.4690 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教程/ 8a3045bc3b2fcf30bc35991cded10e93cd75b61e.jpg |
+| 5 | a91acb1b8beb4dcaa1411d5752bb9537 | 0.4680 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/350套身份证高清正反面+手持身份证照片，真实有效！ 自动发货 价格便宜 做大生意的来！/ 7b11f09f245063b1cb31676d4e8854681f51ba8a.jpg |
+| 6 | 838d2c882fdf4f4ab373ac4358ca03df | 0.4510 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教程/ 8a3045bc3b2fcf30bc35991cded10e93cd75b61e.jpg |
+| 7 | 2f775efc110c463885901e6328cfab9a | 0.4460 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/CraxsRat V3安卓手机远控/ e2439090fb916eb40ba7d4351f8944ba5074a923.jpg |
+| 8 | e334ae5decb94be59460a6bebfc8c7dd | 0.4450 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/10156773条乌克兰数据/ d70ee628010c6ba9ec83e6959d4c8e49593da597.jpg |
+| 9 | 9314893c40944bb782eb5499460277b7 | 0.4430 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/如知道百大企業高管手機號碼 用公司找高管手機 用產業找高管手機/ 86b23881b2183f090c53293aade2561ced185d08.jpg |
+| 10 | 838d2c882fdf4f4ab373ac4358ca03df | 0.4430 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/VIVO s12前置5000万4K摄像头改装教程,手机改装摄像头教程,取证安防,隐蔽拍摄软件,隐蔽拍摄设备,手机改装摄像头教程,VIVO手机改摄像头教程,摄像头改耳机孔,VIVO手机改装教程/ 8a3045bc3b2fcf30bc35991cded10e93cd75b61e.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 8: Query ID f7b6950f67a241d5b0b8669dacf2bee1
+
+**Query Text:** 各种足交姿势视角玩法,
+
+### DNMSR Model Results
+
+This query has 3 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | a037ef4545f64896aca91bd0a0ab819e | 0.4390 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/全球最大的宠物用品零售网站用户数据6k+条/ 06674ec58ae6b50349e85d4191eb7b339fe20386.jpg |
+| 2 | 873e0640fd264a569965410e295087bb | 0.4300 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/商丘大学教师（2015-2020）/ 20b899363cb54bea649b545323e3c983823c8d9a.jpg |
+| 3 | ab07ec9ee60c4c459030d0bb411e3004 | 0.4240 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/20w台湾户籍酒店交友招聘股民电话地址邮箱工作单位等/ 5c6a322b66afde55cfeeae2dccc4af3676eef3d3.jpg |
+| 4 | ba5e99a68bb94999ad086a3ff904bb7f | 0.4230 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/12445 条投资人数据，内涵 手机号、微信、邮箱联系方式和投资方向等备注，google drive 下载/ ace415d2bafbb6e5e17c691fc576e809bae1d23c.jpg |
+| 5 | ba5e99a68bb94999ad086a3ff904bb7f | 0.4230 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/12445 条投资人数据，内涵 手机号、微信、邮箱联系方式和投资方向等备注，google drive 下载/ ace415d2bafbb6e5e17c691fc576e809bae1d23c.jpg |
+| 6 | e75eb558208e476b90413608b4359e86 | 0.4220 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/最新  708.cc 博彩澳门新葡京渗透数据5万3千条/ d23bee08900310db4fa315d1abeea9d9d15fd3f3.jpg |
+| 7 | f90f05326b2049189dc43f910a4e34b9 | 0.4210 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/！！！！！！！！铁路12306车票13万数据！！！！！！！！！/ bed9448eac04f9819d73631e25ad7c0742a032cf.jpg |
+| 8 | f90f05326b2049189dc43f910a4e34b9 | 0.4210 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/！！！！！！！！铁路12306车票13万数据！！！！！！！！！/ bed9448eac04f9819d73631e25ad7c0742a032cf.jpg |
+| 9 | 2dbf70fce8984b27bd6da6aa8fc66596 | 0.4210 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/ 上海市第九人民医院 (SNPH) / 537k / 2021/ 51fc5a3f066e940827d2b14527f72f93198d709d.jpg |
+| 10 | 30b61726b4c247379bcdacb89cc2f131 | 0.4210 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/抖音点赞的工具/ af6a20f8760e56326c2b97be2447a3c2a5b43886.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 9: Query ID 4dda8b1742794a3c8c64ceb2761b8771
+
+**Query Text:** http://www.EliteMate.com
+这个台子后台真实数据，有需要的老板自行拍下，网盘发货
+
+### DNMSR Model Results
+
+This query has 3 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | 4dda8b1742794a3c8c64ceb2761b8771 | 0.5630 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2022美国相亲交友网4000条数据/ f21358458e5d3cedde6e2101673cc1dbb73651f9.jpg |
+| 2 | c25a5fcdfbb249ca9f13bb7c534d48dc | 0.5260 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/102267条西班牙 Whatsapp用户数据/ d20880070d081f4afe421d1ae287dc31d931dc91.jpg |
+| 3 | 61157e64cfce4c0cb58dddeb3faba612 | 0.5200 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 4 | 61157e64cfce4c0cb58dddeb3faba612 | 0.5200 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/印度全资数据  13.8W/ 72f4f619d8efe86c648786171f67dfbdef50a58c.jpg |
+| 5 | b7445848754449a48d7b96f5720abbff | 0.5070 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/Gmail账密3100w+，yahoo账密2100w+/ d97e15164e85404039b8b360840fd7385aa2657d.jpg |
+| 6 | b695674b9d534d4d9a74e7a89372ae32 | 0.5030 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/中国二线明星蒋梦婕的裙底视频以及照片/ 2847ec823c221c43b1bb36ea0b93bfdca6574a8c.jpg |
+| 7 | e270b232ae324950aafb0d677a5e3d5c | 0.5010 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/西班牙1300万 Phone House/ 52448eaac1dc460b228c6bbdad8f4bcf2aa75e7c.jpg |
+| 8 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4950 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 9 | a5afc73e96f24bc5b9ed0aea0dcffb64 | 0.4950 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/借贷宝肉条全套照片视频联系方式2020/ d908524fa19de1de6ac7eb9b15e42dab13b2588a.jpg |
+| 10 | 4dda8b1742794a3c8c64ceb2761b8771 | 0.4890 | ✓ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/2022美国相亲交友网4000条数据/ f21358458e5d3cedde6e2101673cc1dbb73651f9.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+
+## Example 10: Query ID e3a8fbf71bd349cb817a5ba93c6e2384
+
+**Query Text:** 数据资料一经售出概不退换
+
+### DNMSR Model Results
+
+This query has 1 relevant image documents in the gallery
+
+| Rank | Document ID | Similarity | Relevant | Image Path |
+|------|------------|------------|----------|------------|
+| 1 | ad5ae2303cf84d34895b53b1e9409639 | 0.4450 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/无需599u也不需要49.90u，只需10u!【最新仿TokenPocket, Imtoken, MetaMask钱包】 私钥获取器!/ a5871efe73debe666b589db58e91292e440053bd.jpg |
+| 2 | ddc33ef701c546d58c36502618e2cb95 | 0.4340 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/技术技能/黑客工具包很多实用的工具/ aa6c2ea2ed1b938d4c5ff73f6905555a2dcc42ef.jpg |
+| 3 | e75eb558208e476b90413608b4359e86 | 0.4300 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/最新  708.cc 博彩澳门新葡京渗透数据5万3千条/ d23bee08900310db4fa315d1abeea9d9d15fd3f3.jpg |
+| 4 | f7b6950f67a241d5b0b8669dacf2bee1 | 0.4220 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/🎇🎇🎇纯享足交白丝裸足百G资源🎇🎇🎇/ 904a6d9566668b8193c4f2712ed29c5114b2e91c.jpg |
+| 5 | f7b6950f67a241d5b0b8669dacf2bee1 | 0.4220 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/影视音像/🎇🎇🎇纯享足交白丝裸足百G资源🎇🎇🎇/ 904a6d9566668b8193c4f2712ed29c5114b2e91c.jpg |
+| 6 | dd02637120e94e04be46b651389f8332 | 0.4200 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/6.3G美国4千万左右车主数据（姓名，车型，部分带电话等）/ 724bb40e8a69ebdbd6d900f01d725969d8bb3286.jpg |
+| 7 | 73b324c8f2354a5180b4c4728646c2c8 | 0.4190 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/####工商营业执照PSD文件，带字体可随意修改{MEGA网盘自动发货}/ fcd386d4cc53c7c25387679185f98ba09db93a8c.jpg |
+| 8 | ad5ae2303cf84d34895b53b1e9409639 | 0.4170 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/虚拟物品/无需599u也不需要49.90u，只需10u!【最新仿TokenPocket, Imtoken, MetaMask钱包】 私钥获取器!/ a5871efe73debe666b589db58e91292e440053bd.jpg |
+| 9 | 4168e1294d724abab68b61c8488f028e | 0.4140 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/36G欧洲各国各网站邮箱数据/ bf906ccfa3a6d6b15fcacec50b966fed83d6fae7.jpg |
+| 10 | 40325dce7ec74530952ae25ed6f3917a | 0.4040 | ✗ | /home/qhy/MML/DNM_dataset/changan/pic/full/数据资源/3 亿个电子邮件数据库 [[所有国家]] 所有类型 + 印度 （无密码）/ b94e5d7ae00159596ba9496c92a4e44b6b6246a2.jpg |
+
+### CLIP Model Results
+
+No image documents found in the gallery.
+

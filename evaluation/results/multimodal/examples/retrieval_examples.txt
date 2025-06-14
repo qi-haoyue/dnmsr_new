@@ -1,0 +1,17 @@
+多模态混合检索 - 查询示例分析
+生成时间: 2025-06-14 03:46:59
+嵌入目录: /home/qhy/MML/dnmsr/dnmsr_new/evaluation/embeddings
+结果文件: /home/qhy/MML/dnmsr/dnmsr_new/evaluation/results/multimodal/evaluation/retrieval_results.json
+候选文档文件: /home/qhy/MML/dnmsr/dnmsr_new/data_preprocessing/samples/candidate_documents.json
+示例数量: 10
+每个查询显示前 10 个结果
+================================================================================
+
+示例 1: 查询ID: 9240ef42ab994e519288508174a8b76d (模态: multimodal)
+查询文本: 数据字段：姓名、地址1、地址2、地址3、邮编、电话号码、手机号码、城镇、城市、区。
+
+数据为excel格式，数据一共100001条，电话号码有8万7千条左右、手机号码有8万6千条左右，其他信息齐全，具体看下方样品截图。
+查询图像:  69ee8783a87eeca9ab41633fd8f2dc330ed0d7fb.jpg
+--------------------------------------------------------------------------------
+搜索结果 (前 10 个):
+
